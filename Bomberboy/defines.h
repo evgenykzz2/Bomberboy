@@ -18,4 +18,7 @@
 
 #define UNITS_MAX 16
 
+#define STARTUP_CELL_X 1
+#define STARTUP_CELL_Y 1
+
 #endif

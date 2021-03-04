@@ -19,7 +19,7 @@ void loop()
 {
   if (!arduboy.nextFrame())
     return;
-  Game::Control(arduboy.frameCount);
+  Game::Control(Arduboy2Core::buttonsState(), arduboy.frameCount);
 
   Game::Draw(arduboy.frameCount);
 

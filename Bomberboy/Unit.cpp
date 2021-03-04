@@ -5,9 +5,9 @@
 
 //                                  L   R    U   D
 int8_t Unit::s_orientation_dx[4] = {-1, +1,  0,  0};
-int8_t Unit::s_orientation_dy[4] = { 0,  0, +1, -1};
+int8_t Unit::s_orientation_dy[4] = { 0,  0, -1, +1};
 int8_t Unit::s_forward_dx[4] =     {-1, +8,  0,  0};
-int8_t Unit::s_forward_dy[4]=      { 0,  0, +8, -1};
+int8_t Unit::s_forward_dy[4]=      { 0,  0, -1, +8};
   
 void Unit::Move(Unit* unit, uint16_t frame_number)
 {
