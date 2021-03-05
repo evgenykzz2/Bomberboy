@@ -40,7 +40,7 @@ void Map::Init(uint8_t width, uint8_t height)
         line[x] = CELL_SOLID;
       else
       {
-        if (random(100) < 10)
+        if (random(100) < 30)
           line[x] = CELL_BRICK;
         else
           line[x] = CELL_EMPTY;
@@ -59,6 +59,23 @@ uint8_t Map::FindUnusedBombIndex()
       return i;
   }
   return 0xFF;
+}
+
+void Map::CleanBombsOnLevel()
+{
+  for (uint8_t i = 0; i < BOMBS_MAX; ++i)
+    m_bombs[i].radius = 0;
+
+  for (uint8_t y = 0; y < m_height; ++y)
+  {
+    uint8_t* line = m_cell + y * MAP_WIDTH_MAX;
+    for (uint8_t x = 0; x < m_width; ++x)
+    {
+      if ( (line[x] >= CELL_BOMB_INITIAL && line[x] < CELL_BOMB_INITIAL + 4) ||
+           (line[x] >= CELL_BOMB_EXPLOSION && line[x] <= CELL_BOMB_EXPLOSION_LAST) )
+        line[x] = CELL_EMPTY;
+    }
+  }
 }
 
 static void ExplodeBlock(uint8_t cell_x, uint8_t cell_y)

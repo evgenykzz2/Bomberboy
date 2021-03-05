@@ -1,6 +1,8 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#include <Arduboy2.h>
+
 #define TARGET_FRAMERATE 30
 
 #define MAP_WIDTH_MAX  32
@@ -22,5 +24,9 @@
 
 #define STARTUP_CELL_X 1
 #define STARTUP_CELL_Y 1
+
+#define LEVEL_TITLE_DURATION_FRAMES 60
+#define PAUSE_PRESS_DURATION 60
+#define INVULNERABILITY 150
 
 #endif

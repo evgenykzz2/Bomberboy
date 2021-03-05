@@ -1,7 +1,6 @@
 #ifndef MAP_H
 #define MAP_H
 
-#include <Arduboy2.h>
 #include "defines.h"
 #include <stdint.h>
 
@@ -12,6 +11,7 @@
 #define CELL_BOMB_EXPLOSION       0x10
 #define CELL_BOMB_EXPLOSION_HORIZONTAL  0x18
 #define CELL_BOMB_EXPLOSION_VERTICAL    0x20
+#define CELL_BOMB_EXPLOSION_LAST        0x27
 
 #define BOMB_FLAG_LEFT  1
 #define BOMB_FLAG_RIGHT 2
@@ -37,7 +37,8 @@ public:
   
   static Bomb m_bombs[BOMBS_MAX];
   static uint8_t FindUnusedBombIndex();
-  
+  static void CleanBombsOnLevel();
+
   static void Init(uint8_t width, uint8_t height);
   static void Control(uint16_t frame_number);
   static void Draw();

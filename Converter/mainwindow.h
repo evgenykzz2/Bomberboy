@@ -17,6 +17,9 @@ public:
 
 private:
     Ui::MainWindow *ui;
+    void ConvertBitmap(std::stringstream& stream, QString file_name, const char* name);
+    void ConvertSpriteSet(std::stringstream& stream, QString file_name, const char* name);
+    void ConvertSprite(std::stringstream& stream, QString file_name, const char* name);
 };
 
 #endif // MAINWINDOW_H

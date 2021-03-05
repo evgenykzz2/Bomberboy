@@ -11,13 +11,18 @@ public:
   static Player m_player;
   static int16_t m_draw_offset_x;
   static int16_t m_draw_offset_y;
+  static uint8_t m_level;
+  static uint8_t m_splash_level;
+  static uint8_t m_pause_toggle;
+  static uint8_t m_pause_mode;
+  static uint8_t m_ghost_left;
 
   static void Init();
 
   static void StartLevel();
-
-  static void Control(uint8_t buttons, uint16_t frame_number);
-  static void Draw(uint16_t frame_number);
+  
+  static bool Control(uint8_t buttons, uint16_t frame_number);
+  static void Draw(Arduboy2& arduboy);
 };
 
 #endif

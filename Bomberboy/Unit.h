@@ -1,10 +1,10 @@
 #ifndef UNIT_H
 #define UNIT_H
 
-#include <Arduboy2.h>
 #include "defines.h"
 #include <stdint.h>
 
+#define UNIT_SPRITE_DIE 24
 
 struct Unit
 {
@@ -19,7 +19,7 @@ struct Unit
   static int8_t s_forward_dx[4];
   static int8_t s_forward_dy[4];
 
-  static void Move(Unit* unit, uint16_t frame_number);
+  static void Control(Unit* unit, uint16_t frame_number);
   static void Draw(Unit* unit, uint16_t frame_number);
 };
 

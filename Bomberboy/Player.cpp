@@ -12,18 +12,29 @@ void Player::LevelReset(Player* player)
   player->bomb_put = 0;
   player->bomb_last_cell_x = 0;
   player->bomb_last_cell_y = 0;
+  player->invulnerability = 0;
 }
 
 static bool CanPassCell(Player* player, uint8_t cell_x, uint8_t cell_y)
 {
   if (cell_x == player->bomb_last_cell_x && cell_y == player->bomb_last_cell_y)
     return true;
-  if ( Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX] == CELL_EMPTY )
+  uint8_t cell = Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX];
+  if ( cell == CELL_EMPTY )
     return true;
+  if ( cell >= CELL_BOMB_EXPLOSION && cell <= CELL_BOMB_EXPLOSION_LAST )
+    return true;
+  if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_GO_THROUGH_BOMBS) != 0 &&
+       cell >= CELL_BOMB_INITIAL && cell < CELL_BOMB_INITIAL + 4 )
+    return true;
+  if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_GO_THROUGH_WALLS) != 0 &&
+       cell >= CELL_BRICK && cell < CELL_BRICK + 4 )
+    return true;
+
   return false;
 }
 
-static void AllignVertical(Player* player)
+static void AlignVertical(Player* player)
 {
   uint8_t rest = player->y & 7;
   if (rest <= 2)
@@ -32,7 +43,7 @@ static void AllignVertical(Player* player)
     player->y = (player->y & (~7)) + 8;
 }
 
-static void AllignHorizontal(Player* player)
+static void AlignHorizontal(Player* player)
 {
   uint8_t rest = player->x & 7;
   if (rest <= 2)
@@ -43,12 +54,87 @@ static void AllignHorizontal(Player* player)
 
 void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
 {
-  if ( (uint8_t)(frame_number & 3) != 0)
-    return;
-
   //Dead can't control unit
   if ( (uint8_t)(player->flags & UNIT_FLAG_ALIVE) == 0)
+  {
+    player->movement_frame ++;
+    if (player->movement_frame >= 4*8)
+    {
+      //Show level name
+      Game::m_splash_level = LEVEL_TITLE_DURATION_FRAMES;
+
+      //Revive player
+      if (player->lives != 255)
+        player->flags = UNIT_FLAG_ACTIVE | UNIT_FLAG_ALIVE;
+      else
+        player->flags = 0;
+      player->bomb_put = 0;
+      player->bomb_last_cell_x = 0;
+      player->bomb_last_cell_y = 0;
+      player->movement_frame = 0;
+      player->invulnerability = INVULNERABILITY;
+
+      //Remove all bombs
+      Map::CleanBombsOnLevel();
+    }
     return;
+  }
+
+  if (player->invulnerability > 0)
+    player->invulnerability --;
+
+  //Test for death
+  if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_NO_BOMB_DAMAGE) == 0 && player->invulnerability == 0) //Die from bomb
+  {
+    uint8_t cell_x0 = player->x / 8;
+    uint8_t cell_x1 = (player->x+7) / 8;
+    uint8_t cell_y0 = player->y / 8;
+    uint8_t cell_y1 = (player->y+7) / 8;
+    if ( (Map::m_cell[cell_x0 + cell_y0*MAP_WIDTH_MAX] >= CELL_BOMB_EXPLOSION && Map::m_cell[cell_x0 + cell_y0*MAP_WIDTH_MAX] <= CELL_BOMB_EXPLOSION_LAST) ||
+         (Map::m_cell[cell_x1 + cell_y0*MAP_WIDTH_MAX] >= CELL_BOMB_EXPLOSION && Map::m_cell[cell_x1 + cell_y0*MAP_WIDTH_MAX] <= CELL_BOMB_EXPLOSION_LAST) ||
+         (Map::m_cell[cell_x0 + cell_y1*MAP_WIDTH_MAX] >= CELL_BOMB_EXPLOSION && Map::m_cell[cell_x0 + cell_y1*MAP_WIDTH_MAX] <= CELL_BOMB_EXPLOSION_LAST) ||
+         (Map::m_cell[cell_x1 + cell_y1*MAP_WIDTH_MAX] >= CELL_BOMB_EXPLOSION && Map::m_cell[cell_x1 + cell_y1*MAP_WIDTH_MAX] <= CELL_BOMB_EXPLOSION_LAST) )
+    {
+      player->flags = player->flags & (~UNIT_FLAG_ALIVE);
+      player->lives --;
+      player->movement_frame = 0;
+      return;
+    }
+  }
+
+  //Are ghost eat bomber?
+  if (player->invulnerability == 0)
+  {
+    for (uint8_t i = 0; i < UNITS_MAX; ++i)
+    {
+      if ((uint8_t)(Game::m_units[i].flags & UNIT_FLAG_ALIVE) == 0)
+        continue;
+      if (   (player->x   >= Game::m_units[i].x && player->x   < Game::m_units[i].x + 8 && player->y   >= Game::m_units[i].y && player->y   < Game::m_units[i].y + 8)
+          || (player->x+7 >= Game::m_units[i].x && player->x+7 < Game::m_units[i].x + 8 && player->y   >= Game::m_units[i].y && player->y   < Game::m_units[i].y + 8)
+          || (player->x   >= Game::m_units[i].x && player->x   < Game::m_units[i].x + 8 && player->y+7 >= Game::m_units[i].y && player->y+7 < Game::m_units[i].y + 8)
+          || (player->x+7 >= Game::m_units[i].x && player->x+7 < Game::m_units[i].x + 8 && player->y+7 >= Game::m_units[i].y && player->y+7 < Game::m_units[i].y + 8)
+          )
+      {
+        player->flags = player->flags & (~UNIT_FLAG_ALIVE);
+        player->lives --;
+        player->movement_frame = 0;
+        return;
+      }
+    }
+  }
+
+  if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_SPEED_3) != 0 )
+  {
+    //No speed limit
+  } else if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_SPEED_2) != 0 )
+  {
+    if ( (uint8_t)(frame_number & 1) != 0)
+      return;
+  } else
+  {
+    if ( (uint8_t)(frame_number & 3) != 0)
+      return;
+  }
   
   if (buttons == 0)
     return;
@@ -78,10 +164,10 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
   }
 
   if ( (uint8_t)(buttons & (LEFT_BUTTON | RIGHT_BUTTON)) != 0)  //Do vertical align
-    AllignVertical(player);
+    AlignVertical(player);
 
   if ( (uint8_t)(buttons & (UP_BUTTON | DOWN_BUTTON)) != 0) //Do horizontal align
-    AllignHorizontal(player);
+    AlignHorizontal(player);
 
   //Movements
   if (player->bomb_last_cell_x != 0)
@@ -149,14 +235,27 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
   }
 }
 
-void Player::Draw(Player* player)
+void Player::Draw(Player* player, uint16_t frame_number)
 {
-  uint8_t f = player->movement_frame & 3;
-  //f += 12;  //Die
-  uint8_t orientation = player->flags & ORIENTATION_MASK;
-  if (orientation == ORIENTATION_RIGHT)
-    f += 4;
-  if (orientation == ORIENTATION_DOWN || orientation == ORIENTATION_UP)
-    f += 8;
-  Sprites::drawPlusMask(player->x+Game::m_draw_offset_x, player->y+Game::m_draw_offset_y, s_sprites+f*18, 0);
+  if ( (uint8_t)(player->flags & UNIT_FLAG_ALIVE) != 0 )
+  {
+    uint8_t f = player->movement_frame & 3;
+    //f += 12;  //Die
+    uint8_t orientation = player->flags & ORIENTATION_MASK;
+    if (orientation == ORIENTATION_RIGHT)
+      f += 4;
+    if (orientation == ORIENTATION_DOWN || orientation == ORIENTATION_UP)
+      f += 8;
+    if (player->invulnerability > 0)
+    {
+      if ((uint8_t)(frame_number & 3) <= 1)
+        Sprites::drawPlusMask(player->x+Game::m_draw_offset_x, player->y+Game::m_draw_offset_y, s_sprites+f*18, 0);
+    } else
+      Sprites::drawPlusMask(player->x+Game::m_draw_offset_x, player->y+Game::m_draw_offset_y, s_sprites+f*18, 0);
+  } else
+  {
+    uint8_t f = player->movement_frame / 8;
+    f += 12;
+    Sprites::drawPlusMask(player->x+Game::m_draw_offset_x, player->y+Game::m_draw_offset_y, s_sprites+f*18, 0);    
+  }
 }
