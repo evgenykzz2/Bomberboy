@@ -1,5 +1,6 @@
 #include "Unit.h"
 #include "Map.h"
+#include "Game.h"
 #include "assets.h"
 #include <Arduboy2.h>
 
@@ -11,7 +12,7 @@ int8_t Unit::s_forward_dy[4]=      { 0,  0, -1, +8};
   
 void Unit::Move(Unit* unit, uint16_t frame_number)
 {
-  if (frame_number & 3 != 0)
+  if ((uint8_t)(frame_number & 3) != 0)
     return;
   uint8_t orientation = unit->flags & ORIENTATION_MASK;
   int16_t forward_x = (int16_t)unit->x + s_forward_dx[orientation];
@@ -25,13 +26,14 @@ void Unit::Move(Unit* unit, uint16_t frame_number)
     unit->x += s_orientation_dx[orientation];
     unit->y += s_orientation_dy[orientation];
   } else
-  {
     unit->flags = (unit->flags & (~ORIENTATION_MASK)) | (random(4) & ORIENTATION_MASK);
-  }
 }
 
 void Unit::Draw(Unit* unit, uint16_t frame_number)
 {
   uint8_t f = (frame_number / 4) & 3;
-  Sprites::drawPlusMask(unit->x, unit->y, s_sprites+(f+12)*18, 0);
+  uint8_t orientation = unit->flags & ORIENTATION_MASK;
+  if (orientation == ORIENTATION_RIGHT || orientation == ORIENTATION_DOWN)
+    f += 4;
+  Sprites::drawPlusMask(unit->x+Game::m_draw_offset_x, unit->y+Game::m_draw_offset_y, s_sprites+(f+16)*18, 0);
 }

@@ -9,6 +9,8 @@ class Game
 public:
   static Unit m_units[UNITS_MAX];
   static Player m_player;
+  static int16_t m_draw_offset_x;
+  static int16_t m_draw_offset_y;
 
   static void Init();
 

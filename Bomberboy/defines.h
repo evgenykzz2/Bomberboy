@@ -17,6 +17,8 @@
 #define UNIT_FLAG_ALIVE        0x10
 
 #define UNITS_MAX 16
+#define BOMBS_MAX 16
+#define BOMBS_ACTIVATION_FRAMES 150
 
 #define STARTUP_CELL_X 1
 #define STARTUP_CELL_Y 1

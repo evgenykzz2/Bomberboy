@@ -3,26 +3,25 @@
 
 Unit Game::m_units[UNITS_MAX];
 Player Game::m_player;
+int16_t Game::m_draw_offset_x = 0;
+int16_t Game::m_draw_offset_y = 0;
 
 void Game::Init()
 {
   //Clear player
   m_player.flags = 0;
   m_player.lives = 3;
-  m_player.bomb_maximum = 1;
-  m_player.bomb_current = 0;
-  m_player.bomb_radius = 1;
+  m_player.bomb_maximum = 10;
+  m_player.bomb_put = 0;
+  m_player.bomb_radius = 5;
 }
 
 void Game::StartLevel()
 {
-  Map::Init(15, 7);
+  Map::Init(17, 9);
 
   //Prepare player
-  m_player.x = STARTUP_CELL_X*8;
-  m_player.y = STARTUP_CELL_Y*8;
-  m_player.flags = UNIT_FLAG_ACTIVE | UNIT_FLAG_ALIVE;
-
+  Player::LevelReset(&m_player);
   *(Map::m_cell + STARTUP_CELL_Y * MAP_WIDTH_MAX + STARTUP_CELL_X) = CELL_EMPTY;  //Get some free space
   
   //Clear enemies
@@ -57,6 +56,7 @@ void Game::StartLevel()
 
 void Game::Control(uint8_t buttons, uint16_t frame_number)
 {
+  Map::Control(frame_number);
   Player::Control(&m_player, buttons, frame_number);
   
   for (uint8_t i = 0; i < UNITS_MAX; ++i)
@@ -68,7 +68,29 @@ void Game::Control(uint8_t buttons, uint16_t frame_number)
 
 void Game::Draw(uint16_t frame_number)
 {
-  Map::Draw(0, 0);
+  if (Map::m_width == 17)
+    m_draw_offset_x = -4;
+  else
+  {
+    m_draw_offset_x = (64-4)-(int16_t)m_player.x;
+    if (Map::m_width*8+m_draw_offset_x < 128)
+      m_draw_offset_x = 128-(int16_t)Map::m_width*8;
+    if (m_draw_offset_x > 0)
+      m_draw_offset_x = 0;
+  }
+
+  if (Map::m_height == 9)
+    m_draw_offset_y= -4;
+  else
+  {
+    m_draw_offset_y = (32-4)-(int16_t)m_player.y;
+    if (Map::m_height*8+m_draw_offset_y < 128)
+    m_draw_offset_y = 128-(int16_t)Map::m_height*8;
+    if (m_draw_offset_y > 0)
+      m_draw_offset_y = 0;
+  }
+    
+  Map::Draw();
 
   Player::Draw(&m_player);
   for (uint8_t i = 0; i < UNITS_MAX; ++i)
