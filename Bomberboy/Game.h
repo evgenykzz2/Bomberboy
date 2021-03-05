@@ -13,6 +13,12 @@
 #define BONUS_FREEZE_TIME       6
 #define BONUS_MANUAL_EXPLOSION  7
 
+#define GAME_FLAG_GAME_OVER     1
+#define GAME_FLAG_LEVEL_DONE    2
+
+#define PAUSE_MODE_STATS 1
+#define PAUSE_MODE_INFO  2
+
 class Game
 {
 public:
@@ -31,10 +37,12 @@ public:
   static uint8_t m_bonus_type;
   static uint8_t m_exit_cell_x;
   static uint8_t m_exit_cell_y;
+  static uint8_t m_flags;
 
   static void Init();
 
   static void StartLevel();
+  static void PutEmenies(uint8_t unit_type, uint8_t amount);
   
   static bool Control(uint8_t buttons, uint16_t frame_number);
   static void Draw(Arduboy2& arduboy);

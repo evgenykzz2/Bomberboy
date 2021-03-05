@@ -71,7 +71,10 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
       if (player->lives != 255)
         player->flags = UNIT_FLAG_ACTIVE | UNIT_FLAG_ALIVE;
       else
+      {
         player->flags = 0;
+        Game::m_flags |= GAME_FLAG_GAME_OVER;
+      }
       player->bomb_put = 0;
       player->bomb_last_cell_x = 0;
       player->bomb_last_cell_y = 0;
@@ -159,7 +162,33 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
         case BONUS_PROTECTION:
             player->upgrade |= PLAYER_UPGRADE_NO_BOMB_DAMAGE;
         break;
+        case BONUS_GO_THROUGH_WALLS:
+            player->upgrade |= PLAYER_UPGRADE_GO_THROUGH_WALLS;
+        break;
+        case BONUS_GO_THROUGH_BOMBS:
+            player->upgrade |= PLAYER_UPGRADE_GO_THROUGH_BOMBS;
+        break;
+        case BONUS_FREEZE_TIME:
+            //Game::m_ghost_freeze_time = GHOST_FREEZE_TIME;
+        break;
+        case BONUS_MANUAL_EXPLOSION:
+            player->upgrade |= PLAYER_UPGRADE_MANUAL_EXPLOSION;
+        break;
       }
+    }
+  }
+
+  //Test for bonus
+  if (Game::m_ghost_left == 0)
+  {
+    uint8_t cell_x = (player->x+4) / 8;
+    uint8_t cell_y = (player->y+4) / 8;
+    uint8_t cell = Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX];
+    if (cell >= CELL_EXIT && cell < CELL_EXIT+8)
+    {
+      //Level complete !!
+      Game::m_flags |= GAME_FLAG_LEVEL_DONE;
+      return;
     }
   }
   
@@ -211,8 +240,13 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
     for (uint8_t i = 0; i < BOMBS_MAX; ++i)
     {
       if (Map::m_bombs[i].radius == 0)
-        continue; 
-      Map::m_bombs[i].activation_time = 0;
+        continue;
+      //Activate only one bomb
+      if (Map::m_bombs[i].activation_time != 0)
+      {
+        Map::m_bombs[i].activation_time = 0;
+        break;
+      }
     }
   }
 

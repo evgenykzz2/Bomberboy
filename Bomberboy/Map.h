@@ -42,7 +42,7 @@ public:
   static uint8_t FindUnusedBombIndex();
   static void CleanBombsOnLevel();
 
-  static void Init(uint8_t width, uint8_t height);
+  static void Init(uint8_t width, uint8_t height, uint8_t fill_rate);
   static void Control(uint16_t frame_number);
   static void Draw();
 };

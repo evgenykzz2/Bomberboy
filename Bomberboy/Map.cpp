@@ -27,7 +27,7 @@ Bomb Map::m_bombs[BOMBS_MAX];
 uint8_t Map::m_width = 1;
 uint8_t Map::m_height = 1;
 
-void Map::Init(uint8_t width, uint8_t height)
+void Map::Init(uint8_t width, uint8_t height, uint8_t fill_rate)
 {
   m_width = width;
   m_height = height;
@@ -42,7 +42,7 @@ void Map::Init(uint8_t width, uint8_t height)
         line[x] = CELL_SOLID;
       else
       {
-        if (random(100) < 30)
+        if (random(100) < fill_rate)
           line[x] = CELL_BRICK;
         else
           line[x] = CELL_EMPTY;
