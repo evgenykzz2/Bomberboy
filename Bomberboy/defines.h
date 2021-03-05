@@ -20,6 +20,7 @@
 
 #define UNITS_MAX 16
 #define BOMBS_MAX 16
+#define RADIUS_MAX 24
 #define BOMBS_ACTIVATION_FRAMES 150
 
 #define STARTUP_CELL_X 1

@@ -22,6 +22,10 @@ static bool CanPassCell(Player* player, uint8_t cell_x, uint8_t cell_y)
   uint8_t cell = Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX];
   if ( cell == CELL_EMPTY )
     return true;
+  if ( cell >= CELL_BONUS && cell < CELL_BONUS+4 )
+    return true;
+  if ( cell >= CELL_BONUS && cell < CELL_EXIT+8 )
+    return true;
   if ( cell >= CELL_BOMB_EXPLOSION && cell <= CELL_BOMB_EXPLOSION_LAST )
     return true;
   if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_GO_THROUGH_BOMBS) != 0 &&
@@ -123,6 +127,42 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
     }
   }
 
+  //Test for bonus
+  if (Game::m_bonus_cell_x != 0)
+  {
+    uint8_t cell_x = (player->x+4) / 8;
+    uint8_t cell_y = (player->y+4) / 8;
+    uint8_t cell = Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX];
+    if (cell >= CELL_BONUS && cell < CELL_BONUS+4)
+    {
+      Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX] = CELL_EMPTY;
+      Game::m_bonus_cell_x = 0;
+      switch(Game::m_bonus_type)
+      {
+        case BONUS_BOMB_AMOUNT:
+          if (player->bomb_maximum < BOMBS_MAX)
+            player->bomb_maximum++;
+        break;
+        case BONUS_BOMB_RADIUS:
+          if (player->bomb_radius < RADIUS_MAX)
+            player->bomb_radius++;
+        break;
+        case BONUS_SPEED:
+          if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_SPEED_3) != 0 )
+          {
+            //Nothing to change
+          } else if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_SPEED_2) != 0 )
+            player->upgrade |= PLAYER_UPGRADE_SPEED_3;
+          else
+            player->upgrade |= PLAYER_UPGRADE_SPEED_2;
+        break;
+        case BONUS_PROTECTION:
+            player->upgrade |= PLAYER_UPGRADE_NO_BOMB_DAMAGE;
+        break;
+      }
+    }
+  }
+  
   if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_SPEED_3) != 0 )
   {
     //No speed limit
@@ -156,10 +196,23 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
         Map::m_bombs[index].cell_x = cell_x;
         Map::m_bombs[index].cell_y = cell_y;
         Map::m_bombs[index].radius = player->bomb_radius;
-        Map::m_bombs[index].activation_time = BOMBS_ACTIVATION_FRAMES;
+        if ( (uint8_t)(player->upgrade & PLAYER_UPGRADE_MANUAL_EXPLOSION) != 0 )
+          Map::m_bombs[index].activation_time = 255;
+        else
+          Map::m_bombs[index].activation_time = BOMBS_ACTIVATION_FRAMES;
         Map::m_bombs[index].radius_counter = 0;
         Map::m_bombs[index].flags = BOMB_FLAG_LEFT | BOMB_FLAG_RIGHT | BOMB_FLAG_UP | BOMB_FLAG_DOWN;
       }
+    }
+  }
+
+  if ( (uint8_t)(buttons & B_BUTTON) != 0 && (uint8_t)(player->upgrade & PLAYER_UPGRADE_MANUAL_EXPLOSION) != 0 )
+  {
+    for (uint8_t i = 0; i < BOMBS_MAX; ++i)
+    {
+      if (Map::m_bombs[i].radius == 0)
+        continue; 
+      Map::m_bombs[i].activation_time = 0;
     }
   }
 
@@ -256,6 +309,6 @@ void Player::Draw(Player* player, uint16_t frame_number)
   {
     uint8_t f = player->movement_frame / 8;
     f += 12;
-    Sprites::drawPlusMask(player->x+Game::m_draw_offset_x, player->y+Game::m_draw_offset_y, s_sprites+f*18, 0);    
+    Sprites::drawPlusMask(player->x+Game::m_draw_offset_x, player->y+Game::m_draw_offset_y, s_sprites+f*18, 0);
   }
 }

@@ -12,6 +12,12 @@ uint8_t Game::m_pause_toggle;
 uint8_t Game::m_pause_mode;
 uint8_t Game::m_ghost_left;
 
+uint8_t Game::m_bonus_cell_x;
+uint8_t Game::m_bonus_cell_y;
+uint8_t Game::m_bonus_type;
+uint8_t Game::m_exit_cell_x;
+uint8_t Game::m_exit_cell_y;
+
 void Game::Init()
 {
   //Clear player
@@ -24,6 +30,10 @@ void Game::Init()
   m_level = 1;
   m_pause_toggle = 0;
   m_ghost_left = 0;
+
+  m_player.bomb_maximum = BOMBS_MAX;
+  m_player.bomb_radius = RADIUS_MAX;
+  m_player.upgrade = PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS | PLAYER_UPGRADE_NO_BOMB_DAMAGE | PLAYER_UPGRADE_GO_THROUGH_WALLS | PLAYER_UPGRADE_MANUAL_EXPLOSION;
 }
 
 void Game::StartLevel()
@@ -39,6 +49,8 @@ void Game::StartLevel()
   *(Map::m_cell + STARTUP_CELL_Y * MAP_WIDTH_MAX + STARTUP_CELL_X) = CELL_EMPTY;
   *(Map::m_cell + STARTUP_CELL_Y * MAP_WIDTH_MAX + STARTUP_CELL_X+1) = CELL_EMPTY;
   *(Map::m_cell + (STARTUP_CELL_Y+1) * MAP_WIDTH_MAX + STARTUP_CELL_X) = CELL_EMPTY;
+
+  //*(Map::m_cell + STARTUP_CELL_Y * MAP_WIDTH_MAX + STARTUP_CELL_X+2) = CELL_EXIT;
   
   //Clear enemies
   for (uint8_t i = 0; i < UNITS_MAX; ++i)
@@ -69,6 +81,36 @@ void Game::StartLevel()
       break;
     if (enemy_index >= UNITS_MAX)
       break;
+  }
+
+  //But bonus
+  while (true)
+  {
+    uint8_t x = random(Map::m_width);
+    uint8_t y = random(Map::m_height);
+    
+    //Cell is not brick?
+    if (*(Map::m_cell + y * MAP_WIDTH_MAX + x) != CELL_BRICK)
+      continue;
+    m_bonus_cell_x = x;
+    m_bonus_cell_y = y;
+    m_bonus_type = BONUS_BOMB_AMOUNT;
+    break;
+  }
+
+  //But exit
+  while (true)
+  {
+    uint8_t x = random(Map::m_width);
+    uint8_t y = random(Map::m_height);
+    //Cell is not brick?
+    if (*(Map::m_cell + y * MAP_WIDTH_MAX + x) != CELL_BRICK)
+      continue;
+    if (x == m_bonus_cell_x && y == m_bonus_cell_y)
+      continue;
+    m_exit_cell_x = x;
+    m_exit_cell_y = y;
+    break;
   }
 }
 
@@ -143,7 +185,49 @@ void Game::Draw(Arduboy2& arduboy)
     arduboy.setCursor(8, 24); arduboy.print(F("Lives  ")); arduboy.print(m_player.lives);
     arduboy.setCursor(8, 32); arduboy.print(F("Bombs  ")); arduboy.print(m_player.bomb_maximum);
     arduboy.setCursor(8, 40); arduboy.print(F("Radius ")); arduboy.print(m_player.bomb_radius);
-    
+
+    int16_t pos = 8;
+    static const int16_t s = 10;
+    static const int16_t y = 52;
+    uint8_t f = arduboy.frameCount & 3;
+    if ( (uint8_t)(m_player.upgrade & PLAYER_UPGRADE_SPEED_3))
+    {
+      Arduboy2::drawBitmap(pos, y, s_tiles + (CELL_BONUS + f)*8, 8, 8);
+      Sprites::drawPlusMask(pos, y, s_sprites+(32 + BONUS_SPEED)*18, 0);
+      pos += s;
+      Arduboy2::drawBitmap(pos, y, s_tiles + (CELL_BONUS + f)*8, 8, 8);
+      Sprites::drawPlusMask(pos, y, s_sprites+(32 + BONUS_SPEED)*18, 0);
+      pos += s;
+    } else if ( (uint8_t)(m_player.upgrade & PLAYER_UPGRADE_SPEED_2))
+    {
+      Arduboy2::drawBitmap(pos, y, s_tiles + (CELL_BONUS + f)*8, 8, 8);
+      Sprites::drawPlusMask(pos, y, s_sprites+(32 + BONUS_SPEED)*18, 0);
+      pos += s;
+    }
+    if ( (uint8_t)(m_player.upgrade & PLAYER_UPGRADE_GO_THROUGH_BOMBS))
+    {
+      Arduboy2::drawBitmap(pos, y, s_tiles + (CELL_BONUS + f)*8, 8, 8);
+      Sprites::drawPlusMask(pos, y, s_sprites+(32 + BONUS_GO_THROUGH_BOMBS)*18, 0);
+      pos += s;
+    }
+    if ( (uint8_t)(m_player.upgrade & PLAYER_UPGRADE_GO_THROUGH_WALLS))
+    {
+      Arduboy2::drawBitmap(pos, y, s_tiles + (CELL_BONUS + f)*8, 8, 8);
+      Sprites::drawPlusMask(pos, y, s_sprites+(32 + BONUS_GO_THROUGH_WALLS)*18, 0);
+      pos += s;
+    }
+    if ( (uint8_t)(m_player.upgrade & PLAYER_UPGRADE_NO_BOMB_DAMAGE))
+    {
+      Arduboy2::drawBitmap(pos, y, s_tiles + (CELL_BONUS + f)*8, 8, 8);
+      Sprites::drawPlusMask(pos, y, s_sprites+(32 + BONUS_PROTECTION)*18, 0);
+      pos += s;
+    }
+    if ( (uint8_t)(m_player.upgrade & PLAYER_UPGRADE_MANUAL_EXPLOSION))
+    {
+      Arduboy2::drawBitmap(pos, y, s_tiles + (CELL_BONUS + f)*8, 8, 8);
+      Sprites::drawPlusMask(pos, y, s_sprites+(32 + BONUS_MANUAL_EXPLOSION)*18, 0);
+      pos += s;
+    }
   } else
   {
     if (Map::m_width == 17)
@@ -169,6 +253,10 @@ void Game::Draw(Arduboy2& arduboy)
     }
       
     Map::Draw();
+
+    uint8_t bonus_cell = *(Map::m_cell + m_bonus_cell_y*MAP_WIDTH_MAX + m_bonus_cell_x);
+    if (bonus_cell >= CELL_BONUS && bonus_cell < CELL_BONUS+4)
+      Sprites::drawPlusMask(m_bonus_cell_x*8+Game::m_draw_offset_x, m_bonus_cell_y*8 + Game::m_draw_offset_y, s_sprites+(32 + m_bonus_type)*18, 0);
   
     Player::Draw(&m_player, arduboy.frameCount);
     for (uint8_t i = 0; i < UNITS_MAX; ++i)

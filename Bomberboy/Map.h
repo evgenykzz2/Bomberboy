@@ -4,11 +4,14 @@
 #include "defines.h"
 #include <stdint.h>
 
-#define CELL_EMPTY  0
-#define CELL_SOLID  1
-#define CELL_BRICK  2
+#define CELL_EMPTY        0x00
+#define CELL_SOLID        0x01
+#define CELL_BRICK        0x02
 #define CELL_BOMB_INITIAL 0x08
-#define CELL_BOMB_EXPLOSION       0x10
+#define CELL_BONUS        0x0C
+#define CELL_EXIT         0x28
+
+#define CELL_BOMB_EXPLOSION             0x10
 #define CELL_BOMB_EXPLOSION_HORIZONTAL  0x18
 #define CELL_BOMB_EXPLOSION_VERTICAL    0x20
 #define CELL_BOMB_EXPLOSION_LAST        0x27
