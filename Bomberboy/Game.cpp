@@ -95,17 +95,17 @@ void Game::Init()
   m_player.bomb_maximum = 1;
   m_player.bomb_put = 0;
   m_player.bomb_radius = 1;
-  m_level = 50;
+  m_level = 1;
   m_pause_toggle = 0;
   m_ghost_left = 0;
 
-  m_player.bomb_maximum = 4;
-  m_player.bomb_radius = 4;
-  m_player.upgrade = PLAYER_UPGRADE_SPEED_2 | PLAYER_UPGRADE_NO_BOMB_DAMAGE;
+  //m_player.bomb_maximum = 4;
+  //m_player.bomb_radius = 4;
+  //m_player.upgrade = PLAYER_UPGRADE_SPEED_2 | PLAYER_UPGRADE_NO_BOMB_DAMAGE;
 
-  m_player.bomb_maximum = BOMBS_MAX;
-  m_player.bomb_radius = RADIUS_MAX;
-  m_player.upgrade = PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS | PLAYER_UPGRADE_NO_BOMB_DAMAGE | PLAYER_UPGRADE_GO_THROUGH_WALLS | PLAYER_UPGRADE_MANUAL_EXPLOSION;
+  //m_player.bomb_maximum = BOMBS_MAX;
+  //m_player.bomb_radius = RADIUS_MAX;
+  //m_player.upgrade = PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS | PLAYER_UPGRADE_NO_BOMB_DAMAGE | PLAYER_UPGRADE_GO_THROUGH_WALLS | PLAYER_UPGRADE_MANUAL_EXPLOSION;
 }
 
 void Game::PutEmenies(uint8_t unit_type, uint8_t amount)
