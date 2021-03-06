@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "defines.h"
 #include "assets.h"
+#include "audio.h"
 
 namespace Bomberboy
 {
@@ -67,25 +68,12 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
     player->movement_frame ++;
     if (player->movement_frame >= 4*8)
     {
-      //Show level name
-      Game::m_splash_level = LEVEL_TITLE_DURATION_FRAMES;
-
       //Revive player
-      if (player->lives != 255)
-        player->flags = UNIT_FLAG_ACTIVE | UNIT_FLAG_ALIVE;
-      else
+      if (player->flags != 0)
       {
         player->flags = 0;
-        Game::m_flags |= GAME_FLAG_GAME_OVER;
+        Game::m_flags |= GAME_FLAG_PLAYER_DIE;
       }
-      player->bomb_put = 0;
-      player->bomb_last_cell_x = 0;
-      player->bomb_last_cell_y = 0;
-      player->movement_frame = 0;
-      player->invulnerability = INVULNERABILITY;
-
-      //Remove all bombs
-      Map::CleanBombsOnLevel();
     }
     return;
   }
@@ -108,6 +96,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
       player->flags = player->flags & (~UNIT_FLAG_ALIVE);
       player->lives --;
       player->movement_frame = 0;
+      sound.tones(s_sfx_die);
       return;
     }
   }
@@ -128,6 +117,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
         player->flags = player->flags & (~UNIT_FLAG_ALIVE);
         player->lives --;
         player->movement_frame = 0;
+        sound.tones(s_sfx_die);
         return;
       }
     }
@@ -141,6 +131,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
     uint8_t cell = Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX];
     if (cell >= CELL_BONUS && cell < CELL_BONUS+4)
     {
+      sound.tones(s_sfx_bonus);
       Map::m_cell[cell_x + cell_y*MAP_WIDTH_MAX] = CELL_EMPTY;
       Game::m_bonus_cell_x = 0;
       switch(Game::m_bonus_type)
@@ -172,7 +163,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
             player->upgrade |= PLAYER_UPGRADE_GO_THROUGH_BOMBS;
         break;
         case BONUS_FREEZE_TIME:
-            //Game::m_ghost_freeze_time = GHOST_FREEZE_TIME;
+            Game::m_ghost_freeze = GHOST_FREEZE_TIME;
         break;
         case BONUS_MANUAL_EXPLOSION:
             player->upgrade |= PLAYER_UPGRADE_MANUAL_EXPLOSION;
@@ -221,6 +212,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
       uint8_t index = Map::FindUnusedBombIndex();
       if (index != 0xFF)
       {
+        sound.tones(s_sfx_bomb_put);
         *(Map::m_cell + cell_y * MAP_WIDTH_MAX + cell_x) = CELL_BOMB_INITIAL;
         player->bomb_put ++;
         player->bomb_last_cell_x = cell_x;

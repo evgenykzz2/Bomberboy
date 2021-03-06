@@ -15,6 +15,9 @@
 
 #define GAME_FLAG_GAME_OVER     1
 #define GAME_FLAG_LEVEL_DONE    2
+#define GAME_FLAG_PLAYER_DIE    4
+#define GAME_FLAG_PAUSE_DEATH   8
+#define GAME_FLAG_PAUSE_LEVEL_DONE    16
 
 #define PAUSE_MODE_STATS 1
 #define PAUSE_MODE_INFO  2
@@ -34,6 +37,7 @@ public:
   static uint8_t m_pause_toggle;
   static uint8_t m_pause_mode;
   static uint8_t m_ghost_left;
+  static uint8_t m_ghost_freeze;
 
   static uint8_t m_bonus_cell_x;
   static uint8_t m_bonus_cell_y;
@@ -41,6 +45,7 @@ public:
   static uint8_t m_exit_cell_x;
   static uint8_t m_exit_cell_y;
   static uint8_t m_flags;
+  static uint8_t m_game_pause_music;
 
   static void Init();
 

@@ -1,6 +1,7 @@
 #include "Map.h"
 #include "assets.h"
 #include "Game.h"
+#include "audio.h"
 
 namespace Bomberboy
 {
@@ -139,6 +140,7 @@ void Map::Control(uint16_t frame_number)
         {
           Game::m_player.bomb_put--;
           *(m_cell + cell_index) = CELL_BOMB_EXPLOSION;
+          sound.tones(s_sfx_explosion2);
         } else
         {
           //Explosion Rays

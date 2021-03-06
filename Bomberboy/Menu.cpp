@@ -3,6 +3,7 @@
 #include "Game.h"
 #include "Map.h"
 #include "Unit.h"
+#include "Audio.h"
 
 namespace Bomberboy
 {
@@ -14,6 +15,12 @@ uint16_t Menu::m_present_time;
   
 void Menu::Init()
 {
+  Arduboy2Core::setRGBled(RED_LED, 0);
+  Arduboy2Core::setRGBled(GREEN_LED, 0);
+  Arduboy2Core::setRGBled(BLUE_LED, 0);
+
+  sound.tones(s_music_title);
+
   m_bomb_speed = 0;
   m_bomb_pos = -16*32;
   m_logo_pos = 128;
@@ -95,14 +102,16 @@ void FinalCutScene::Init()
 {
   Menu::m_logo_pos = 64;
   Menu::m_bomb_pos = -8;
+  sound.tones(s_music_game_complete);
 }
 
 bool FinalCutScene::Control(uint8_t buttons, uint16_t frame_number)
 {
   if ((uint8_t)(frame_number & 7) == 0)
   {
-    if (Menu::m_bomb_pos < 120)
-      Menu::m_bomb_pos += 1;
+    Menu::m_bomb_pos += 1;
+    if (Menu::m_bomb_pos >= 120)
+      return true;
   }
   if ((uint8_t)(frame_number & 3) == 0)
   {

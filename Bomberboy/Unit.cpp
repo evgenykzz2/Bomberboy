@@ -60,6 +60,9 @@ void Unit::Control(Unit* unit, uint16_t frame_number)
     return;
   }
 
+  if (Game::m_ghost_freeze != 0)
+    return;
+
   uint8_t flags = pgm_read_byte(s_unit_info + unit->type*2+1);
   uint8_t speed = flags & UNIT_AI_SPEED_MASK;
 

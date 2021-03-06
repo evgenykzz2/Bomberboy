@@ -2,6 +2,7 @@
 #include "Map.h"
 #include "Menu.h"
 #include "assets.h"
+#include "audio.h"
 
 namespace Bomberboy
 {
@@ -15,6 +16,7 @@ uint8_t Game::m_splash_level;
 uint8_t Game::m_pause_toggle;
 uint8_t Game::m_pause_mode;
 uint8_t Game::m_ghost_left;
+uint8_t Game::m_ghost_freeze;
 
 uint8_t Game::m_bonus_cell_x;
 uint8_t Game::m_bonus_cell_y;
@@ -23,11 +25,12 @@ uint8_t Game::m_exit_cell_x;
 uint8_t Game::m_exit_cell_y;
 
 uint8_t Game::m_flags;
+uint8_t Game::m_game_pause_music;
 
 static const uint8_t s_level_info[] PROGMEM =
 {
   //W H   Bonus                   fill  enemy 1            enemy 2
-  17, 9,  BONUS_BOMB_AMOUNT,      20,   UNIT_BALLOM,  2,   UNIT_BALLOM, 0,    // 1
+  17, 9,  BONUS_FREEZE_TIME,      20,   UNIT_BALLOM,  2,   UNIT_BALLOM, 0,    // 1
   17, 9,  BONUS_BOMB_RADIUS,      21,   UNIT_BALLOM,  3,   UNIT_BALLOM, 0,    // 2
   17, 9,  BONUS_SPEED,            22,   UNIT_BALLOM,  4,   UNIT_BALLOM, 0,    // 3
   21, 9,  BONUS_BOMB_RADIUS,      23,   UNIT_BALLOM,  4,   UNIT_ONIL,   1,    // 4
@@ -86,7 +89,12 @@ static const uint8_t s_level_info[] PROGMEM =
 
 void Game::Init()
 {
+  Arduboy2Core::setRGBled(RED_LED, 0);
+  Arduboy2Core::setRGBled(GREEN_LED, 0);
+  Arduboy2Core::setRGBled(BLUE_LED, 0);
+
   m_flags = 0;
+  m_game_pause_music = 0;
 
   //Clear player
   m_player.upgrade = 0;
@@ -140,6 +148,9 @@ void Game::PutEmenies(uint8_t unit_type, uint8_t amount)
 void Game::StartLevel()
 {
   m_splash_level = LEVEL_TITLE_DURATION_FRAMES;
+  sound.tones(s_music_level_start);
+  m_game_pause_music = 0;
+  m_ghost_freeze = 0;
 
   uint16_t level_offset = ((uint16_t)(m_level-1) * 8);
   
@@ -197,6 +208,8 @@ void Game::StartLevel()
         break;
       if (m_bonus_type == BONUS_MANUAL_EXPLOSION && (uint8_t)(m_player.upgrade & PLAYER_UPGRADE_MANUAL_EXPLOSION ) == 0)
         break;
+      if (m_bonus_type == BONUS_FREEZE_TIME)
+        break;
       m_bonus_type = random(8);
     }
     break;
@@ -223,11 +236,61 @@ bool Game::Control(uint8_t buttons, uint16_t frame_number)
   if ( (uint8_t)(m_flags & GAME_FLAG_LEVEL_DONE) )
   {
     m_flags &= (~GAME_FLAG_LEVEL_DONE);
-    m_level++;
-    if (m_level > 50)
-      return true;
-    StartLevel();
-    m_splash_level = LEVEL_TITLE_DURATION_FRAMES;
+    m_flags |= GAME_FLAG_PAUSE_LEVEL_DONE;
+    m_game_pause_music = 90;
+    sound.tones(s_music_level_done);
+  }
+   
+  if ( (uint8_t)(m_flags & GAME_FLAG_PLAYER_DIE) )
+  {
+    m_flags &= (~GAME_FLAG_PLAYER_DIE);
+    m_game_pause_music = 60;
+    m_flags |= GAME_FLAG_PAUSE_DEATH;
+    sound.tones(s_music_level_die);
+  }
+  
+  if (m_game_pause_music > 0)
+  {
+    m_game_pause_music --;
+    if (m_game_pause_music == 0)
+    {
+      if ( (uint8_t)(m_flags & GAME_FLAG_PAUSE_DEATH) )
+      {
+        m_flags &= (~GAME_FLAG_PAUSE_DEATH);
+        if (m_player.lives != 0)
+        {
+          m_player.lives--;
+          m_player.bomb_put = 0;
+          m_player.bomb_last_cell_x = 0;
+          m_player.bomb_last_cell_y = 0;
+          m_player.movement_frame = 0;
+          m_player.invulnerability = INVULNERABILITY;
+          m_player.flags = UNIT_FLAG_ACTIVE | UNIT_FLAG_ALIVE;
+      
+          //Show level name
+          m_splash_level = LEVEL_TITLE_DURATION_FRAMES;
+          sound.tones(s_music_level_start);
+          //Remove all bombs
+          Map::CleanBombsOnLevel();
+        } else
+        {
+          //This is over
+          Game::m_flags |= GAME_FLAG_GAME_OVER;
+          sound.tones(s_music_game_over);
+          m_splash_level = LEVEL_GAME_OVER_DURATION_FRAMES;
+        }
+        return false;
+      }
+      if ( (uint8_t)(m_flags & GAME_FLAG_PAUSE_LEVEL_DONE) )
+      {
+        m_flags &= (~GAME_FLAG_PAUSE_LEVEL_DONE);
+        m_level++;
+        if (m_level > 50)
+          return true;
+        StartLevel();
+        m_splash_level = LEVEL_TITLE_DURATION_FRAMES;
+      }
+    }
   }
   
   if (m_splash_level != 0)
@@ -283,13 +346,30 @@ bool Game::Control(uint8_t buttons, uint16_t frame_number)
   }
 
   Map::Control(frame_number);
-  Player::Control(&m_player, buttons, frame_number);
-  
+  if ( (uint8_t)(m_player.flags & UNIT_FLAG_ACTIVE) != 0 && (uint8_t)(Game::m_flags & GAME_FLAG_PAUSE_LEVEL_DONE) == 0)
+    Player::Control(&m_player, buttons, frame_number);
+
+  if ( (uint8_t)(m_player.flags & UNIT_FLAG_ALIVE) == 0)
+    Arduboy2Core::setRGBled(RED_LED, 255);
+  else
+    Arduboy2Core::setRGBled(RED_LED, 0);
+
+  if (m_ghost_freeze > 0)
+    m_ghost_freeze --;
   for (uint8_t i = 0; i < UNITS_MAX; ++i)
   {
     if ((uint8_t)(m_units[i].flags & UNIT_FLAG_ACTIVE) != 0)
       Unit::Control(m_units+i, frame_number+i);
   }
+  if (m_ghost_left == 0)
+    Arduboy2Core::setRGBled(GREEN_LED, 255);
+  else
+    Arduboy2Core::setRGBled(GREEN_LED, 0);
+
+  if (m_bonus_cell_x == 0)
+    Arduboy2Core::setRGBled(BLUE_LED, 255);
+  else
+    Arduboy2Core::setRGBled(BLUE_LED, 0);
 
   if ( (uint8_t)(m_flags & GAME_FLAG_GAME_OVER) != 0 && m_splash_level == 0 )
     return true;
@@ -301,7 +381,7 @@ void Game::Draw(Arduboy2& arduboy)
 {
   if (m_splash_level != 0)
   {
-    if (m_player.lives == 255)
+    if ( (uint8_t)(m_flags & GAME_FLAG_GAME_OVER) )
     {
       arduboy.setCursor(38, 32);
       arduboy.print(F("GAME OVER"));
@@ -421,12 +501,14 @@ void Game::Draw(Arduboy2& arduboy)
     uint8_t bonus_cell = *(Map::m_cell + m_bonus_cell_y*MAP_WIDTH_MAX + m_bonus_cell_x);
     if (bonus_cell >= CELL_BONUS && bonus_cell < CELL_BONUS+4)
       Sprites::drawPlusMask(m_bonus_cell_x*8+Game::m_draw_offset_x, m_bonus_cell_y*8 + Game::m_draw_offset_y, s_sprites+(UNIT_SPRITE_BONUS + m_bonus_type)*18, 0);
-  
-    Player::Draw(&m_player, arduboy.frameCount);
+
+    if ( (uint8_t)(m_player.flags & UNIT_FLAG_ACTIVE) != 0 )
+      Player::Draw(&m_player, arduboy.frameCount);
+
     for (uint8_t i = 0; i < UNITS_MAX; ++i)
     {
       if ((uint8_t)(m_units[i].flags & UNIT_FLAG_ACTIVE) != 0)
-        Unit::Draw(m_units+i, arduboy.frameCount+i);
+        Unit::Draw(m_units+i, (m_ghost_freeze == 0) ? (arduboy.frameCount+i) : i);
     }
   }
 }

@@ -5,6 +5,8 @@
 #include "../../../Shared.h"
 #else
 #include <Arduboy2.h>
+#include <ArduboyTones.h>
+extern ArduboyTones sound;
 #endif
 
 #define TARGET_FRAMERATE 30
@@ -32,7 +34,8 @@
 #define STARTUP_CELL_X 1
 #define STARTUP_CELL_Y 1
 
-#define LEVEL_TITLE_DURATION_FRAMES 60
+#define LEVEL_TITLE_DURATION_FRAMES 80
+#define LEVEL_GAME_OVER_DURATION_FRAMES 180
 #define PAUSE_PRESS_DURATION 60
 #define INVULNERABILITY 150
 #define GHOST_FREEZE_TIME 240

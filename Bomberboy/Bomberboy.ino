@@ -6,10 +6,10 @@
 #define sprites arduboy_sprites
 #else
 Arduboy2 arduboy;
-//ArduboyTones sound(arduboy.audio.enabled);
+ArduboyTones sound(arduboy.audio.enabled);
 Sprites sprites;
 #endif
- 
+
 #define MODE_MENU 0
 #define MODE_GAME 1
 #define MODE_FINAL_CUT_SCENE 2
@@ -25,7 +25,6 @@ void setup()
 {
   arduboy.begin();
   arduboy.setFrameRate(TARGET_FRAMERATE);
-  
   s_mode = MODE_MENU;
   Bomberboy::Menu::Init();
 
@@ -75,8 +74,12 @@ void loop()
       Bomberboy::Game::Draw(arduboy);
   } else if (s_mode == MODE_FINAL_CUT_SCENE)
   {
-    Bomberboy::FinalCutScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount);
-    Bomberboy::FinalCutScene::Draw(arduboy);
+    if (Bomberboy::FinalCutScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount))
+    {
+      s_mode = MODE_MENU;
+      Bomberboy::Menu::Init();
+    } else
+      Bomberboy::FinalCutScene::Draw(arduboy);
   } else if (s_mode == MODE_GAME_INFO)
   {
     if ( Bomberboy::GameInfoScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount) )
