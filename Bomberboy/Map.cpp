@@ -2,6 +2,9 @@
 #include "assets.h"
 #include "Game.h"
 
+namespace Bomberboy
+{
+  
 static const uint8_t s_block_animation_mask[] PROGMEM =
 {
   0x00, 0x00, 0x00, 0x03, 0x03, 0x03, 0x00, 0x00,
@@ -202,4 +205,6 @@ void Map::Draw()
       Arduboy2::drawBitmap(x*8+Game::m_draw_offset_x, y*8+Game::m_draw_offset_y, s_tiles + ((uint16_t)line[x])*8, 8, 8);
     }
   }
+}
+
 }

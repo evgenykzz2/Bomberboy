@@ -4,6 +4,9 @@
 #include "defines.h"
 #include <stdint.h>
 
+namespace Bomberboy
+{
+
 #define UNIT_SPRITE_DIE     0x18
 #define UNIT_SPRITE_BONUS   0x20
 
@@ -21,6 +24,7 @@
 #define UNIT_AI_TURN        0x08
 #define UNIT_AI_ATTACK      0x10
 #define UNIT_AI_8_FRAME     0x20
+//#define UNIT_AI_HIDE        0x40
 
 #define UNIT_BALLOM  0
 #define UNIT_ONIL    1
@@ -41,11 +45,12 @@ struct Unit
   static int8_t s_orientation_dx[4];
   static int8_t s_orientation_dy[4];
 
-  static int8_t s_forward_dx[4];
-  static int8_t s_forward_dy[4];
-
   static void Control(Unit* unit, uint16_t frame_number);
   static void Draw(Unit* unit, uint16_t frame_number);
 };
+
+extern const uint8_t s_unit_info[];
+
+}
 
 #endif

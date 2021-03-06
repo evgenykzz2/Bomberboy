@@ -4,6 +4,9 @@
 #include "defines.h"
 #include <stdint.h>
 
+namespace Bomberboy
+{
+  
 class Menu
 {
 public:
@@ -15,5 +18,25 @@ public:
   static bool Control(uint8_t buttons, uint16_t frame_number);
   static void Draw(Arduboy2& arduboy);
 };
+
+class FinalCutScene
+{
+public:
+  static void Init();
+  static bool Control(uint8_t buttons, uint16_t frame_number);
+  static void Draw(Arduboy2& arduboy);
+};
+
+class GameInfoScene
+{
+public:
+  static void DrawBonusInfo(Arduboy2& arduboy, int16_t x, int16_t &y, int16_t step);
+  static void DrawEnemyInfo(Arduboy2& arduboy, int16_t x, int16_t &y, int16_t step);
+  static void Init();
+  static bool Control(uint8_t buttons, uint16_t frame_number);
+  static void Draw(Arduboy2& arduboy);
+};
+
+}
 
 #endif

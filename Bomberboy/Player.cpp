@@ -1,8 +1,11 @@
 #include "Player.h"
 #include "Map.h"
 #include "Game.h"
+#include "defines.h"
 #include "assets.h"
-#include <Arduboy2.h>
+
+namespace Bomberboy
+{
 
 void Player::LevelReset(Player* player)
 {
@@ -116,10 +119,10 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
     {
       if ((uint8_t)(Game::m_units[i].flags & UNIT_FLAG_ALIVE) == 0)
         continue;
-      if (   (player->x   >= Game::m_units[i].x && player->x   < Game::m_units[i].x + 8 && player->y   >= Game::m_units[i].y && player->y   < Game::m_units[i].y + 8)
-          || (player->x+7 >= Game::m_units[i].x && player->x+7 < Game::m_units[i].x + 8 && player->y   >= Game::m_units[i].y && player->y   < Game::m_units[i].y + 8)
-          || (player->x   >= Game::m_units[i].x && player->x   < Game::m_units[i].x + 8 && player->y+7 >= Game::m_units[i].y && player->y+7 < Game::m_units[i].y + 8)
-          || (player->x+7 >= Game::m_units[i].x && player->x+7 < Game::m_units[i].x + 8 && player->y+7 >= Game::m_units[i].y && player->y+7 < Game::m_units[i].y + 8)
+      if (   (player->x+2 >= Game::m_units[i].x && player->x+2 < Game::m_units[i].x + 8 && player->y+2 >= Game::m_units[i].y && player->y+2 < Game::m_units[i].y + 8)
+          || (player->x+5 >= Game::m_units[i].x && player->x+5 < Game::m_units[i].x + 8 && player->y+2 >= Game::m_units[i].y && player->y+2 < Game::m_units[i].y + 8)
+          || (player->x+2 >= Game::m_units[i].x && player->x+2 < Game::m_units[i].x + 8 && player->y+5 >= Game::m_units[i].y && player->y+5 < Game::m_units[i].y + 8)
+          || (player->x+5 >= Game::m_units[i].x && player->x+5 < Game::m_units[i].x + 8 && player->y+5 >= Game::m_units[i].y && player->y+5 < Game::m_units[i].y + 8)
           )
       {
         player->flags = player->flags & (~UNIT_FLAG_ALIVE);
@@ -178,7 +181,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
     }
   }
 
-  //Test for bonus
+  //Test for exit
   if (Game::m_ghost_left == 0)
   {
     uint8_t cell_x = (player->x+4) / 8;
@@ -345,4 +348,6 @@ void Player::Draw(Player* player, uint16_t frame_number)
     f += 12;
     Sprites::drawPlusMask(player->x+Game::m_draw_offset_x, player->y+Game::m_draw_offset_y, s_sprites+f*18, 0);
   }
+}
+
 }

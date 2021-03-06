@@ -19,6 +19,9 @@
 #define PAUSE_MODE_STATS 1
 #define PAUSE_MODE_INFO  2
 
+namespace Bomberboy
+{
+
 class Game
 {
 public:
@@ -47,5 +50,7 @@ public:
   static bool Control(uint8_t buttons, uint16_t frame_number);
   static void Draw(Arduboy2& arduboy);
 };
+
+}
 
 #endif

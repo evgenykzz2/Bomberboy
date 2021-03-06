@@ -4,6 +4,9 @@
 #include "defines.h"
 #include <stdint.h>
 
+namespace Bomberboy
+{
+  
 #define PLAYER_UPGRADE_SPEED_2            0x01
 #define PLAYER_UPGRADE_SPEED_3            0x02
 #define PLAYER_UPGRADE_GO_THROUGH_BOMBS   0x04
@@ -30,5 +33,7 @@ struct Player
   static void Control(Player* player, uint8_t buttons, uint16_t frame_number);
   static void Draw(Player* player, uint16_t frame_number);
 };
+
+}
 
 #endif

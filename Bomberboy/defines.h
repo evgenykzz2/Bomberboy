@@ -1,7 +1,11 @@
 #ifndef DEFINES_H
 #define DEFINES_H
 
+#ifdef ESP8266
+#include "../../../Shared.h"
+#else
 #include <Arduboy2.h>
+#endif
 
 #define TARGET_FRAMERATE 30
 
@@ -22,6 +26,8 @@
 #define BOMBS_MAX 16
 #define RADIUS_MAX 24
 #define BOMBS_ACTIVATION_FRAMES 150
+
+#define GAME_INFO_ACTIVATION_FRAMES 0x1FF
 
 #define STARTUP_CELL_X 1
 #define STARTUP_CELL_Y 1

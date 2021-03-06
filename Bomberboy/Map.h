@@ -4,12 +4,16 @@
 #include "defines.h"
 #include <stdint.h>
 
+namespace Bomberboy
+{
+
 #define CELL_EMPTY        0x00
 #define CELL_SOLID        0x01
 #define CELL_BRICK        0x02
 #define CELL_BOMB_INITIAL 0x08
 #define CELL_BONUS        0x0C
 #define CELL_EXIT         0x28
+#define CELL_BRICK_CUT_SCENE 0x06
 
 #define CELL_BOMB_EXPLOSION             0x10
 #define CELL_BOMB_EXPLOSION_HORIZONTAL  0x18
@@ -46,5 +50,7 @@ public:
   static void Control(uint16_t frame_number);
   static void Draw();
 };
+
+}
 
 #endif

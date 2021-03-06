@@ -1,51 +1,93 @@
-#include <Arduboy2.h>
 #include "defines.h"
 #include "Menu.h"
 #include "Game.h"
 
+#ifdef ESP8266
+#define sprites arduboy_sprites
+#else
 Arduboy2 arduboy;
 //ArduboyTones sound(arduboy.audio.enabled);
 Sprites sprites;
-
+#endif
+ 
 #define MODE_MENU 0
 #define MODE_GAME 1
+#define MODE_FINAL_CUT_SCENE 2
+#define MODE_GAME_INFO 3
 
 static uint8_t s_mode;
 
+#ifdef ESP8266
+void Game_Bomberboy_setup()
+#else
 void setup()
+#endif
 {
   arduboy.begin();
   arduboy.setFrameRate(TARGET_FRAMERATE);
   
   s_mode = MODE_MENU;
-  Menu::Init();
+  Bomberboy::Menu::Init();
 
-  //Game::Init();
-  //Game::StartLevel();
+  //Bomberboy::Game::Init();
+  //Bomberboy::Game::StartLevel();
+  
+  //s_mode = MODE_FINAL_CUT_SCENE;
+  //Bomberboy::FinalCutScene::Init();
 }
 
+#ifdef ESP8266
+void Game_Bomberboy_loop()
+#else
 void loop()
+#endif
 {
   if (!arduboy.nextFrame())
     return;
 
   if (s_mode == MODE_MENU)
   {
-    if (Menu::Control(Arduboy2Core::buttonsState(), arduboy.frameCount))
+    if (Bomberboy::Menu::Control(Arduboy2Core::buttonsState(), arduboy.frameCount))
     {
       s_mode = MODE_GAME;
-      Game::Init();
-      Game::StartLevel();
+      Bomberboy::Game::Init();
+      Bomberboy::Game::StartLevel();
+    } else if ( (uint16_t)(arduboy.frameCount & GAME_INFO_ACTIVATION_FRAMES) == (GAME_INFO_ACTIVATION_FRAMES-1))
+    {
+      s_mode = MODE_GAME_INFO;
+      Bomberboy::GameInfoScene::Init();
     } else
-      Menu::Draw(arduboy);
+      Bomberboy::Menu::Draw(arduboy);
   } else if (s_mode == MODE_GAME)
   {
-    if (Game::Control(Arduboy2Core::buttonsState(), arduboy.frameCount))
+    if (Bomberboy::Game::Control(Arduboy2Core::buttonsState(), arduboy.frameCount))
+    {
+      if (Bomberboy::Game::m_level > 50)
+      {
+        s_mode = MODE_FINAL_CUT_SCENE;
+        Bomberboy::FinalCutScene::Init();
+      } else
+      {
+        s_mode = MODE_MENU;
+        Bomberboy::Menu::Init();
+      }
+    } else
+      Bomberboy::Game::Draw(arduboy);
+  } else if (s_mode == MODE_FINAL_CUT_SCENE)
+  {
+    Bomberboy::FinalCutScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount);
+    Bomberboy::FinalCutScene::Draw(arduboy);
+  } else if (s_mode == MODE_GAME_INFO)
+  {
+    if ((uint16_t)(arduboy.frameCount & GAME_INFO_ACTIVATION_FRAMES) == (GAME_INFO_ACTIVATION_FRAMES-1))
     {
       s_mode = MODE_MENU;
-      Menu::Init();
+      Bomberboy::Menu::Init();
     } else
-      Game::Draw(arduboy);
+    {
+      Bomberboy::GameInfoScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount);
+      Bomberboy::GameInfoScene::Draw(arduboy);
+    }
   }
   arduboy.display(true);
 }

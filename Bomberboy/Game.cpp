@@ -3,6 +3,9 @@
 #include "Menu.h"
 #include "assets.h"
 
+namespace Bomberboy
+{
+
 Unit Game::m_units[UNITS_MAX];
 Player Game::m_player;
 int16_t Game::m_draw_offset_x = 0;
@@ -86,19 +89,23 @@ void Game::Init()
   m_flags = 0;
 
   //Clear player
-  m_player.upgrade = 0; //PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS;
+  m_player.upgrade = 0;
   m_player.flags = 0;
-  m_player.lives = 3;
+  m_player.lives = 30;
   m_player.bomb_maximum = 1;
   m_player.bomb_put = 0;
   m_player.bomb_radius = 1;
-  m_level = 1;
+  m_level = 50;
   m_pause_toggle = 0;
   m_ghost_left = 0;
 
-  //m_player.bomb_maximum = BOMBS_MAX;
-  //m_player.bomb_radius = RADIUS_MAX;
-  //m_player.upgrade = PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS | PLAYER_UPGRADE_NO_BOMB_DAMAGE | PLAYER_UPGRADE_GO_THROUGH_WALLS | PLAYER_UPGRADE_MANUAL_EXPLOSION;
+  m_player.bomb_maximum = 4;
+  m_player.bomb_radius = 4;
+  m_player.upgrade = PLAYER_UPGRADE_SPEED_2 | PLAYER_UPGRADE_NO_BOMB_DAMAGE;
+
+  m_player.bomb_maximum = BOMBS_MAX;
+  m_player.bomb_radius = RADIUS_MAX;
+  m_player.upgrade = PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS | PLAYER_UPGRADE_NO_BOMB_DAMAGE | PLAYER_UPGRADE_GO_THROUGH_WALLS | PLAYER_UPGRADE_MANUAL_EXPLOSION;
 }
 
 void Game::PutEmenies(uint8_t unit_type, uint8_t amount)
@@ -216,8 +223,10 @@ bool Game::Control(uint8_t buttons, uint16_t frame_number)
   if ( (uint8_t)(m_flags & GAME_FLAG_LEVEL_DONE) )
   {
     m_flags &= (~GAME_FLAG_LEVEL_DONE);
-    StartLevel();
     m_level++;
+    if (m_level > 50)
+      return true;
+    StartLevel();
     m_splash_level = LEVEL_TITLE_DURATION_FRAMES;
   }
   
@@ -240,7 +249,7 @@ bool Game::Control(uint8_t buttons, uint16_t frame_number)
         m_pause_mode = PAUSE_MODE_STATS;
       Menu::m_logo_pos = 0;   //A counter, used for memory saving
       Menu::m_bomb_pos = 0;
-      return;
+      return false;
     }
   } else
     m_pause_toggle = 0;
@@ -298,10 +307,10 @@ void Game::Draw(Arduboy2& arduboy)
       arduboy.print(F("GAME OVER"));
     } else
     {
-      arduboy.setCursor(48, 32);
+      arduboy.setCursor(42, 32);
       arduboy.print(F("Level "));
       arduboy.print(m_level);
-      arduboy.setCursor(48, 56);
+      arduboy.setCursor(42, 56);
       arduboy.print(F("Lives "));
       arduboy.print(m_player.lives);
     }
@@ -320,7 +329,7 @@ void Game::Draw(Arduboy2& arduboy)
         uint16_t index = (uint16_t)i*PARTICLE_FRAMES*2 + ((arduboy.frameCount + i*3) & (PARTICLE_FRAMES-1))*2;
         int8_t dx = (int8_t)pgm_read_byte(s_particle + index );
         int8_t dy = (int8_t)pgm_read_byte(s_particle + index + 1 );
-        Arduboy2::drawPixel(bomb_x + dx + 20, bomb_y + dy + 0);
+        arduboy.drawPixel(bomb_x + dx + 20, bomb_y + dy + 0);
       }
   
       arduboy.setCursor(8,  8); arduboy.print(F("Level  ")); arduboy.print(m_level);
@@ -374,58 +383,8 @@ void Game::Draw(Arduboy2& arduboy)
     } else
     {
       int16_t pos = -Menu::m_bomb_pos;
-      static const int16_t s = 10;
-      static const int16_t x = 8;
-      uint8_t f = arduboy.frameCount & 3;
+      GameInfoScene::DrawBonusInfo(arduboy, 8, pos, 10);
       
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_BOMB_AMOUNT)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("One more bomb"));
-      pos += s;
-
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_BOMB_RADIUS)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("Radius"));
-      pos += s;
-
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_SPEED)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("Speed"));
-      pos += s;
-
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_PROTECTION)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("Protection"));
-      pos += s;
-
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_GO_THROUGH_WALLS)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("Walk over walls"));
-      pos += s;
-
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_GO_THROUGH_BOMBS)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("Walk over bombs"));
-      pos += s;
-
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_FREEZE_TIME)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("Freeze ghosts"));
-      pos += s;
-
-      Arduboy2::drawBitmap(x, pos, s_tiles + (CELL_BONUS + f)*8, 8, 8);
-      Sprites::drawPlusMask(x, pos, s_sprites+(UNIT_SPRITE_BONUS + BONUS_MANUAL_EXPLOSION)*18, 0);
-      arduboy.setCursor(x + 10, pos);
-      arduboy.print(F("Bomb control"));
-      pos += s;
-
       //Progress bar
       arduboy.fillRect(128-7, 0, 6, 64, WHITE);
       arduboy.fillRect(128-6, 1, 4, 62, BLACK);
@@ -470,4 +429,6 @@ void Game::Draw(Arduboy2& arduboy)
         Unit::Draw(m_units+i, arduboy.frameCount+i);
     }
   }
+}
+
 }

@@ -193,6 +193,9 @@ MainWindow::MainWindow(QWidget *parent) :
     stream_cpp << "#include \"assets.h\"" << std::endl;
     stream_cpp << "#include <stdint.h>" << std::endl;
     stream_cpp << "#include <avr/pgmspace.h>" << std::endl;
+    stream_cpp << std::endl;
+    stream_cpp << "namespace Bomberboy" << std::endl;
+    stream_cpp << "{" << std::endl;
 
     ConvertBitmap(stream_cpp, "../assets/tileset.png", "s_tiles");
     ConvertSpriteSet(stream_cpp, "../assets/spriteset.png", "s_sprites");
@@ -248,7 +251,7 @@ MainWindow::MainWindow(QWidget *parent) :
         stream_cpp << std::endl <<"};" << std::endl;
 
     }
-
+    stream_cpp << "}" << std::endl;
     FILE* file = fopen("../Bomberboy/assets.cpp", "wb");
     fwrite(stream_cpp.str().c_str(), 1, stream_cpp.str().length(), file);
     fclose(file);
