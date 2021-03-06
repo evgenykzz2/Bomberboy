@@ -52,7 +52,7 @@ void loop()
       s_mode = MODE_GAME;
       Bomberboy::Game::Init();
       Bomberboy::Game::StartLevel();
-    } else if ( (uint16_t)(arduboy.frameCount & GAME_INFO_ACTIVATION_FRAMES) == (GAME_INFO_ACTIVATION_FRAMES-1))
+    } else if ( Bomberboy::Menu::m_present_time >= GAME_INFO_ACTIVATION_FRAMES )
     {
       s_mode = MODE_GAME_INFO;
       Bomberboy::GameInfoScene::Init();
@@ -79,13 +79,12 @@ void loop()
     Bomberboy::FinalCutScene::Draw(arduboy);
   } else if (s_mode == MODE_GAME_INFO)
   {
-    if ((uint16_t)(arduboy.frameCount & GAME_INFO_ACTIVATION_FRAMES) == (GAME_INFO_ACTIVATION_FRAMES-1))
+    if ( Bomberboy::GameInfoScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount) )
     {
       s_mode = MODE_MENU;
       Bomberboy::Menu::Init();
     } else
     {
-      Bomberboy::GameInfoScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount);
       Bomberboy::GameInfoScene::Draw(arduboy);
     }
   }

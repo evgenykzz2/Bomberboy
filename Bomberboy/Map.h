@@ -27,12 +27,12 @@ namespace Bomberboy
 
 struct Bomb
 {
-  uint8_t cell_x;
-  uint8_t cell_y;
-  uint8_t activation_time;
-  uint8_t radius;
-  uint8_t radius_counter;
-  uint8_t flags;
+  uint8_t cell_x;           //5 bits
+  uint8_t cell_y;           //4 bits
+  uint8_t activation_time;  //8bits
+  uint8_t radius;           //5 bits
+  uint8_t radius_counter;   //5bits
+  uint8_t flags;            //2 bits
 };
 
 class Map

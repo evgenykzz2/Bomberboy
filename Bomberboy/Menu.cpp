@@ -10,12 +10,14 @@ namespace Bomberboy
 int16_t Menu::m_bomb_speed;
 int16_t Menu::m_bomb_pos;
 uint8_t Menu::m_logo_pos;
+uint16_t Menu::m_present_time;
   
 void Menu::Init()
 {
   m_bomb_speed = 0;
   m_bomb_pos = -16*32;
   m_logo_pos = 128;
+  m_present_time = 0;
 
   //Use bomb to animate particle
   for (uint8_t i = 0; i < BOMBS_MAX; ++i)
@@ -24,6 +26,8 @@ void Menu::Init()
 
 bool Menu::Control(uint8_t buttons, uint16_t frame_number)
 {
+  m_present_time ++;
+
   //Animate bomb
   m_bomb_speed += 4;
   m_bomb_pos += m_bomb_speed;
@@ -135,15 +139,20 @@ void FinalCutScene::Draw(Arduboy2& arduboy)
 void GameInfoScene::Init()
 {
   Menu::m_bomb_pos = 64;
+  Menu::m_present_time = 0;
 }
 
 bool GameInfoScene::Control(uint8_t buttons, uint16_t frame_number)
 {
+  Menu::m_present_time ++;
+  if (buttons != 0 || Menu::m_present_time >= GAME_INFO_ACTIVATION_FRAMES)
+    return true;
   if ((uint8_t)(frame_number & 1) == 0)
   {
     if (Menu::m_logo_pos > -100)
       Menu::m_bomb_pos --;
   }
+  return false;
 }
 
 void GameInfoScene::DrawBonusInfo(Arduboy2& arduboy, int16_t x, int16_t &y, int16_t step)

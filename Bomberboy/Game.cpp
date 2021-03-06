@@ -91,7 +91,7 @@ void Game::Init()
   //Clear player
   m_player.upgrade = 0;
   m_player.flags = 0;
-  m_player.lives = 30;
+  m_player.lives = 3;
   m_player.bomb_maximum = 1;
   m_player.bomb_put = 0;
   m_player.bomb_radius = 1;
