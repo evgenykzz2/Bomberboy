@@ -30,7 +30,7 @@ uint8_t Game::m_game_pause_music;
 static const uint8_t s_level_info[] PROGMEM =
 {
   //W H   Bonus                   fill  enemy 1            enemy 2
-  17, 9,  BONUS_FREEZE_TIME,      20,   UNIT_BALLOM,  2,   UNIT_BALLOM, 0,    // 1
+  17, 9,  BONUS_BOMB_AMOUNT,      20,   UNIT_BALLOM,  2,   UNIT_BALLOM, 0,    // 1
   17, 9,  BONUS_BOMB_RADIUS,      21,   UNIT_BALLOM,  3,   UNIT_BALLOM, 0,    // 2
   17, 9,  BONUS_SPEED,            22,   UNIT_BALLOM,  4,   UNIT_BALLOM, 0,    // 3
   21, 9,  BONUS_BOMB_RADIUS,      23,   UNIT_BALLOM,  4,   UNIT_ONIL,   1,    // 4

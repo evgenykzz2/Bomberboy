@@ -11,6 +11,7 @@ namespace Bomberboy
 int16_t Menu::m_bomb_speed;
 int16_t Menu::m_bomb_pos;
 uint8_t Menu::m_logo_pos;
+uint8_t Menu::m_button_filter;
 uint16_t Menu::m_present_time;
   
 void Menu::Init()
@@ -24,6 +25,7 @@ void Menu::Init()
   m_bomb_speed = 0;
   m_bomb_pos = -16*32;
   m_logo_pos = 128;
+  m_button_filter = 0;
   m_present_time = 0;
 
   //Use bomb to animate particle
@@ -31,7 +33,7 @@ void Menu::Init()
     Map::m_bombs[i].activation_time = random(80) + 11;
 }
 
-bool Menu::Control(uint8_t buttons, uint16_t frame_number)
+bool Menu::Control(Arduboy2& arduboy, uint8_t buttons, uint16_t frame_number)
 {
   m_present_time ++;
 
@@ -76,6 +78,17 @@ bool Menu::Control(uint8_t buttons, uint16_t frame_number)
   if ( (uint8_t)(buttons & A_BUTTON) != 0 )
     return true;
 
+  if ( (uint8_t)(buttons & B_BUTTON) != 0 && m_button_filter == 0)
+  {
+    m_button_filter = 10;
+    if (arduboy.audio.enabled())
+      arduboy.audio.off();
+    else
+      arduboy.audio.on();
+  }
+  if (m_button_filter != 0)
+    m_button_filter--;
+
   return false;
 }
 
@@ -83,8 +96,14 @@ void Menu::Draw(Arduboy2& arduboy)
 {
   Arduboy2::drawBitmap(m_logo_pos, 13, s_logo, 112, 32);
   Sprites::drawPlusMask(32, m_bomb_pos >> 5, s_bomb, 0);
-  arduboy.setCursor(28 - m_logo_pos, 50);
+  arduboy.setCursor(28 - m_logo_pos, 44);
   arduboy.print(F("Press A to start"));
+
+  arduboy.setCursor(64 - m_logo_pos, 54);
+  if (arduboy.audio.enabled())
+    arduboy.print(F("B audio ON"));
+  else
+    arduboy.print(F("B audio OFF"));
 
   for (uint8_t i = 0; i < BOMBS_MAX; ++i)
   {

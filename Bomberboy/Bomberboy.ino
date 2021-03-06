@@ -46,7 +46,7 @@ void loop()
 
   if (s_mode == MODE_MENU)
   {
-    if (Bomberboy::Menu::Control(Arduboy2Core::buttonsState(), arduboy.frameCount))
+    if (Bomberboy::Menu::Control(arduboy, Arduboy2Core::buttonsState(), arduboy.frameCount))
     {
       s_mode = MODE_GAME;
       Bomberboy::Game::Init();
