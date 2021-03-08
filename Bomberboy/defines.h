@@ -3,6 +3,7 @@
 
 #ifdef ESP8266
 #include "../../../Shared.h"
+#define sound (*arduboy_tones)
 #else
 #include <Arduboy2.h>
 #include <ArduboyTones.h>
@@ -10,6 +11,7 @@ extern ArduboyTones sound;
 #endif
 
 #define TARGET_FRAMERATE 30
+#define VERSION "1.0"
 
 #define MAP_WIDTH_MAX  32
 #define MAP_HEIGHT_MAX 16
@@ -29,7 +31,7 @@ extern ArduboyTones sound;
 #define RADIUS_MAX 24
 #define BOMBS_ACTIVATION_FRAMES 150
 
-#define GAME_INFO_ACTIVATION_FRAMES 0x1FF
+#define GAME_INFO_ACTIVATION_FRAMES 600
 
 #define STARTUP_CELL_X 1
 #define STARTUP_CELL_Y 1
@@ -39,5 +41,6 @@ extern ArduboyTones sound;
 #define PAUSE_PRESS_DURATION 60
 #define INVULNERABILITY 150
 #define GHOST_FREEZE_TIME 240
+
 
 #endif

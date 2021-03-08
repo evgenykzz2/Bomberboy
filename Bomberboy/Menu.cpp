@@ -13,6 +13,7 @@ int16_t Menu::m_bomb_pos;
 uint8_t Menu::m_logo_pos;
 uint8_t Menu::m_button_filter;
 uint16_t Menu::m_present_time;
+uint8_t Menu::m_difficult_level = 0;
   
 void Menu::Init()
 {
@@ -78,6 +79,15 @@ bool Menu::Control(Arduboy2& arduboy, uint8_t buttons, uint16_t frame_number)
   if ( (uint8_t)(buttons & A_BUTTON) != 0 )
     return true;
 
+  if ( ((uint8_t)(buttons & LEFT_BUTTON) != 0 || (uint8_t)(buttons & RIGHT_BUTTON) != 0)
+       && m_button_filter == 0)
+  {
+    m_button_filter = 10;
+    m_difficult_level += 1;
+    if (m_difficult_level > 1)
+      m_difficult_level = 0;
+  }
+
   if ( (uint8_t)(buttons & B_BUTTON) != 0 && m_button_filter == 0)
   {
     m_button_filter = 10;
@@ -104,6 +114,12 @@ void Menu::Draw(Arduboy2& arduboy)
     arduboy.print(F("B audio ON"));
   else
     arduboy.print(F("B audio OFF"));
+
+  arduboy.setCursor(12 - (int16_t)m_logo_pos, 54);
+  if (m_difficult_level == 1)
+    arduboy.print(F("<>Hard"));
+  else
+    arduboy.print(F("<>Easy"));
 
   for (uint8_t i = 0; i < BOMBS_MAX; ++i)
   {
@@ -352,6 +368,17 @@ void GameInfoScene::Draw(Arduboy2& arduboy)
   static const int16_t step = 10;
   static const int16_t x = 16;
   int16_t y = Menu::m_bomb_pos;
+
+  arduboy.setCursor(x, y);
+  arduboy.print(F("Bomberboy "));
+  arduboy.print(F(VERSION));
+  y += step;
+  
+  arduboy.setCursor(x, y);
+  arduboy.print(F("Evgenykz 2020"));
+  y += step;
+  y += step;
+  
   if (y < 64 && y > -8)
   {
     arduboy.setCursor(x, y);

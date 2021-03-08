@@ -22,7 +22,11 @@ void Game_Bomberboy_setup()
 #else
 void setup()
 #endif
-{
+{  
+  #ifdef ESP8266
+  arduboy_tones = new ArduboyTones(arduboy.audio.enabled);
+  #endif
+
   arduboy.begin();
   arduboy.setFrameRate(TARGET_FRAMERATE);
   s_mode = MODE_MENU;

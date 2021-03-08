@@ -15,6 +15,7 @@ public:
   static uint8_t m_logo_pos;
   static uint8_t m_button_filter;
   static uint16_t m_present_time;
+  static uint8_t  m_difficult_level;
 
   static void Init();
   static bool Control(Arduboy2& arduboy, uint8_t buttons, uint16_t frame_number);

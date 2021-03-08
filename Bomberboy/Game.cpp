@@ -107,6 +107,14 @@ void Game::Init()
   m_pause_toggle = 0;
   m_ghost_left = 0;
 
+  if (Menu::m_difficult_level == 0)
+  {
+    m_player.lives = 5;
+    m_player.bomb_maximum = 2;
+    m_player.bomb_radius = 2;
+    m_player.upgrade = PLAYER_UPGRADE_SPEED_2;
+  }
+
   //m_player.bomb_maximum = 4;
   //m_player.bomb_radius = 4;
   //m_player.upgrade = PLAYER_UPGRADE_SPEED_2 | PLAYER_UPGRADE_NO_BOMB_DAMAGE;
