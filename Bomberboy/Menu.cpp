@@ -375,7 +375,7 @@ void GameInfoScene::Draw(Arduboy2& arduboy)
   y += step;
   
   arduboy.setCursor(x, y);
-  arduboy.print(F("Evgenykz 2020"));
+  arduboy.print(F("Evgenykz 2021"));
   y += step;
   y += step;
   
