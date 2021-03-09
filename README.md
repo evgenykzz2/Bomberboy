@@ -1,7 +1,7 @@
 # Bomberboy
 Bomberman port for Arduboy
 
-![Demo](Images/demo.gif)
+![Demo](publish/bomberboy.gif)
 
 Features:
 - Original music
