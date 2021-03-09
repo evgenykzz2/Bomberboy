@@ -119,9 +119,10 @@ void Game::Init()
   //m_player.bomb_radius = 4;
   //m_player.upgrade = PLAYER_UPGRADE_SPEED_2 | PLAYER_UPGRADE_NO_BOMB_DAMAGE;
 
-  //m_player.bomb_maximum = BOMBS_MAX;
-  //m_player.bomb_radius = RADIUS_MAX;
-  //m_player.upgrade = PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS | PLAYER_UPGRADE_NO_BOMB_DAMAGE | PLAYER_UPGRADE_GO_THROUGH_WALLS | PLAYER_UPGRADE_MANUAL_EXPLOSION;
+  m_player.bomb_maximum = BOMBS_MAX;
+  m_player.bomb_radius = RADIUS_MAX;
+  m_player.upgrade = PLAYER_UPGRADE_SPEED_3 | PLAYER_UPGRADE_GO_THROUGH_BOMBS | PLAYER_UPGRADE_NO_BOMB_DAMAGE | PLAYER_UPGRADE_GO_THROUGH_WALLS | PLAYER_UPGRADE_MANUAL_EXPLOSION;
+  m_level = 40;
 }
 
 void Game::PutEmenies(uint8_t unit_type, uint8_t amount)
