@@ -16,5 +16,4 @@ Features:
 # Donate
 It is totaly free, But you can donate if you want
 
-[![Donate](https://img.shields.io/badge/Donate-PayPal-green.svg)](evgenykzz2@gmail.com)
 WebMoney: Z266158126091
