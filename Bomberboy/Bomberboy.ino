@@ -50,7 +50,7 @@ void loop()
 
   if (s_mode == MODE_MENU)
   {
-    if (Bomberboy::Menu::Control(arduboy, Arduboy2Core::buttonsState(), arduboy.frameCount))
+    if (Bomberboy::Menu::Control(arduboy, Arduboy2Core::buttonsState()))
     {
       s_mode = MODE_GAME;
       Bomberboy::Game::Init();
@@ -78,7 +78,7 @@ void loop()
       Bomberboy::Game::Draw(arduboy);
   } else if (s_mode == MODE_FINAL_CUT_SCENE)
   {
-    if (Bomberboy::FinalCutScene::Control(Arduboy2Core::buttonsState(), arduboy.frameCount))
+    if (Bomberboy::FinalCutScene::Control(arduboy.frameCount))
     {
       s_mode = MODE_MENU;
       Bomberboy::Menu::Init();

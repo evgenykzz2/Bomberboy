@@ -94,7 +94,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
          (Map::m_cell[cell_x1 + cell_y1*MAP_WIDTH_MAX] >= CELL_BOMB_EXPLOSION && Map::m_cell[cell_x1 + cell_y1*MAP_WIDTH_MAX] <= CELL_BOMB_EXPLOSION_LAST) )
     {
       player->flags = player->flags & (~UNIT_FLAG_ALIVE);
-      player->lives --;
+      //player->lives --;
       player->movement_frame = 0;
       sound.tones(s_sfx_die);
       return;
@@ -204,7 +204,7 @@ void Player::Control(Player* player, uint8_t buttons, uint16_t frame_number)
 
   if ( (uint8_t)(buttons & A_BUTTON) != 0 && player->bomb_put < player->bomb_maximum )
   {
-    uint8_t orientation = player->flags & ORIENTATION_MASK;  
+    //uint8_t orientation = player->flags & ORIENTATION_MASK;  
     uint8_t cell_x = (player->x + 4) / 8;
     uint8_t cell_y = (player->y + 4) / 8;
     if ( *(Map::m_cell + cell_y * MAP_WIDTH_MAX + cell_x) == CELL_EMPTY )

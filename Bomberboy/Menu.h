@@ -18,7 +18,7 @@ public:
   static uint8_t  m_difficult_level;
 
   static void Init();
-  static bool Control(Arduboy2& arduboy, uint8_t buttons, uint16_t frame_number);
+  static bool Control(Arduboy2& arduboy, uint8_t buttons);
   static void Draw(Arduboy2& arduboy);
 };
 
@@ -26,7 +26,7 @@ class FinalCutScene
 {
 public:
   static void Init();
-  static bool Control(uint8_t buttons, uint16_t frame_number);
+  static bool Control(uint16_t frame_number);
   static void Draw(Arduboy2& arduboy);
 };
 

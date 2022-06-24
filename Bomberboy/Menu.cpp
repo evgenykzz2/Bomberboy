@@ -34,7 +34,7 @@ void Menu::Init()
     Map::m_bombs[i].activation_time = random(80) + 11;
 }
 
-bool Menu::Control(Arduboy2& arduboy, uint8_t buttons, uint16_t frame_number)
+bool Menu::Control(Arduboy2& arduboy, uint8_t buttons)
 {
   m_present_time ++;
 
@@ -140,7 +140,7 @@ void FinalCutScene::Init()
   sound.tones(s_music_game_complete);
 }
 
-bool FinalCutScene::Control(uint8_t buttons, uint16_t frame_number)
+bool FinalCutScene::Control(uint16_t frame_number)
 {
   if ((uint8_t)(frame_number & 7) == 0)
   {
@@ -193,7 +193,7 @@ bool GameInfoScene::Control(uint8_t buttons, uint16_t frame_number)
     return true;
   if ((uint8_t)(frame_number & 1) == 0)
   {
-    if (Menu::m_logo_pos > -100)
+    //if (Menu::m_logo_pos > -100)
       Menu::m_bomb_pos --;
   }
   return false;
